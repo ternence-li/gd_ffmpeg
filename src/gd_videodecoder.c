@@ -352,14 +352,16 @@ inline static bool api_ver(godot_gdnative_api_version v, unsigned int want_major
 }
 
 
-void gdffmpeg_init(godot_gdnative_core_api_struct *api_struc) {
+void gdffmpeg_init(const godot_gdnative_core_api_struct *api_struc) {
 	_setup_clock();
 	api = api_struc;
 	for (int i = 0; i < api->num_extensions; i++) {
 		switch (api->extensions[i]->type) {
 			case GDNATIVE_EXT_VIDEODECODER:
 				videodecoder_api = (godot_gdnative_ext_videodecoder_api_struct *)api->extensions[i];
-
+				if (videodecoder_api != NULL) {
+					videodecoder_api->godot_videodecoder_register_decoder(&plugin_interface);
+				}
 				break;
 			case GDNATIVE_EXT_NATIVESCRIPT:
 				nativescript_api = (godot_gdnative_ext_nativescript_api_struct *)api->extensions[i];
@@ -378,14 +380,8 @@ void gdffmpeg_init(godot_gdnative_core_api_struct *api_struc) {
 	print_codecs();
 }
 
-void gdffmpeg_terminate(godot_gdnative_core_api_struct *api_struc) {
+void gdffmpeg_terminate(const godot_gdnative_core_api_struct *api_struc) {
 	api = NULL;
-}
-
-void godot_gdnative_singleton() {
-	if (videodecoder_api != NULL) {
-		videodecoder_api->godot_videodecoder_register_decoder(&plugin_interface);
-	}
 }
 
 void *godot_videodecoder_constructor(godot_object *p_instance) {

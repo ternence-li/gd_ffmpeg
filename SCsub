@@ -13,10 +13,13 @@ if env["arch"] == "x64":
 
 if env["platform"] == "windows":
 	env_module.Append(CPPPATH=["lib/Windows/%s/include"%arch])
+	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"/lib/Windows/%s/lib"%arch])
 elif env["platform"] == "x11":
 	env_module.Append(CPPPATH=["lib/linux/%s/include"%arch])
+	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"/lib/linux/%s/lib"%arch])
 elif env["platform"] == "android":
 	env_module.Append(CPPPATH=["lib/android/%s/include"%arch])
+	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"/lib/android/%s/lib"%arch])
 elif env["platform"] == "iphone":
 	env_module.Append(CPPPATH=["lib/ios/universal/include"%arch])
 	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"lib/ios/universal/lib"%arch])
