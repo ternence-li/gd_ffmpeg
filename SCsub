@@ -2,34 +2,37 @@
 import os
 import platform
 
-Import('env')
-Import('env_modules')
+Import("env")
+Import("env_modules")
 
 env_module = env_modules.Clone()
 
 arch = env["arch"] if "arch" in env and env["arch"] else platform.machine()
-if env["arch"] == "x64":
-	arch = "x86_64"
+if arch == "x64":
+    arch = "x86_64"
+elif arch == "mips":
+    arch = "mips32"
 
+env_module.Append(CPPPATH=["src"])
 if env["platform"] == "windows":
-	env_module.Append(CPPPATH=["lib/Windows/%s/include"%arch])
-	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"/lib/Windows/%s/lib"%arch])
-elif env["platform"] == "x11":
-	env_module.Append(CPPPATH=["lib/linux/%s/include"%arch])
-	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"/lib/linux/%s/lib"%arch])
+    env_module.Append(CPPPATH=["lib/Windows/%s/include" % arch])
+    env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/Windows/%s/lib" % arch])
+elif env["platform"] == "x11" or env["platform"] == "frt":
+    env_module.Append(CPPPATH=["lib/linux/%s/include" % arch])
+    env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/linux/%s/lib" % arch])
 elif env["platform"] == "android":
-	env_module.Append(CPPPATH=["lib/android/%s/include"%arch])
-	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"/lib/android/%s/lib"%arch])
+    env_module.Append(CPPPATH=["lib/android/%s/include" % arch])
+    env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/android/%s/lib" % arch])
 elif env["platform"] == "iphone":
-	env_module.Append(CPPPATH=["lib/ios/universal/include"%arch])
-	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"lib/ios/universal/lib"%arch])
+    env_module.Append(CPPPATH=["lib/ios/universal/include" % arch])
+    env.Append(LIBPATH=[os.path.realpath(os.curdir) + "lib/ios/universal/lib" % arch])
 elif env["platform"] == "osx":
-	env_module.Append(CPPPATH=["lib/macosx/%s/include"%arch])
-	env.Append(LIBPATH=[os.path.realpath(os.curdir)+"/lib/macosx/%s/lib"%arch])
+    env_module.Append(CPPPATH=["lib/macosx/%s/include" % arch])
+    env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/macosx/%s/lib" % arch])
 
-sources = Glob("src/*.cpp") + Glob("src/*.c")
+sources = Glob("*.cpp") + Glob("src/*.c")
 
 # Compile as a static library
 lib = env_module.Library("gd_ffmpeg", sources)
 # Add the library as a dependency of the final executable
-env.Prepend(LIBS=[lib, "avcodec", "avformat", "avutil", "swresample", "swscale"])
+env.Prepend(LIBS=[lib, "avformat", "avcodec", "avutil", "swresample", "swscale"])
