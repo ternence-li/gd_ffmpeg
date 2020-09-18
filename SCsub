@@ -29,6 +29,9 @@ elif env["platform"] == "iphone":
 elif env["platform"] == "osx":
     env_module.Append(CPPPATH=["lib/macosx/%s/include" % arch])
     env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/macosx/%s/lib" % arch])
+elif env["platform"] == "psvita":
+    env_module.Append(CPPPATH=["lib/vita/%s/include" % arch])
+    env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/vita/%s/lib" % arch])
 
 sources = Glob("*.cpp") + Glob("src/*.c")
 

@@ -1,8 +1,5 @@
-# config.py
-
-
 def can_build(env, platform):
-    return True
+    return platform != "3ds"
 
 
 def configure(env):

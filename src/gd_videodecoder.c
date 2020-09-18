@@ -242,7 +242,6 @@ static void _unwrap_video_frame(godot_pool_byte_array *dest, AVFrame *frame, int
 
 	godot_pool_byte_array_write_access *write_access = api->godot_pool_byte_array_write(dest);
 	uint8_t *write_ptr = api->godot_pool_byte_array_write_access_ptr(write_access);
-	int val = 0;
 	for (int y = 0; y < height; y++) {
 		memcpy(write_ptr, frame->data[0] + y * frame->linesize[0], width * 4);
 		write_ptr += width * 4;
@@ -318,7 +317,7 @@ static inline godot_real _avtime_to_sec(int64_t avtime) {
 }
 
 static void _godot_print(char *msg) {
-	godot_string g_msg = {0};
+	godot_string g_msg = { {0} };
 	g_msg = api->godot_string_chars_to_utf8(msg);
 	api->godot_print(&g_msg);
 	api->godot_string_destroy(&g_msg);
@@ -360,6 +359,7 @@ inline static bool api_ver(godot_gdnative_api_version v, unsigned int want_major
 
 
 void gdffmpeg_init(const godot_gdnative_core_api_struct *api_struc) {
+	av_register_all();
 	_setup_clock();
 	api = api_struc;
 	for (int i = 0; i < api->num_extensions; i++) {
@@ -981,7 +981,7 @@ retry_audio:
 				//api->godot_print_warning("video packet queue empty", "godot_videodecoder_get_videoframe()", __FILE__, __LINE__);
 				if (!read_frame(data)) {
 					PROFILE_END();
-					return NULL;
+					return 0;
 				}
 			}
 			ret = avcodec_decode_video2(data->acodec_ctx, data->audio_frame, &frame_finished, &pkt);
@@ -991,12 +991,12 @@ retry_audio:
 				api->godot_print_error(msg, "godot_videodecoder_get_videoframe()", __FILE__, __LINE__);
 				av_packet_unref(&pkt);
 				PROFILE_END();
-				return NULL;
+				return 0;
 			}
 			if (!frame_finished) {
 				av_packet_unref(&pkt);
 				PROFILE_END();
-				return NULL;
+				return 0;
 			}
 #endif
 			// only set the audio frame time if this is the first frame we've decoded during this update.
