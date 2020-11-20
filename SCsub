@@ -13,7 +13,8 @@ if arch == "x64":
 elif arch == "mips":
     arch = "mips32"
 
-env_module.Append(CPPPATH=["src"])
+env_module.Append(CPPPATH=["src", os.path.dirname(os.path.realpath(os.curdir)) + "/gdnative/include"])
+
 if env["platform"] == "windows":
     env_module.Append(CPPPATH=["lib/Windows/%s/include" % arch])
     env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/Windows/%s/lib" % arch])
@@ -32,6 +33,9 @@ elif env["platform"] == "osx":
 elif env["platform"] == "psvita":
     env_module.Append(CPPPATH=["lib/vita/%s/include" % arch])
     env.Append(LIBPATH=[os.path.realpath(os.curdir) + "/lib/vita/%s/lib" % arch])
+else:
+    print('Error: Platform '%s' is not supported.' % env["platform"])
+    Exit(1)
 
 sources = Glob("*.cpp") + Glob("src/*.c")
 

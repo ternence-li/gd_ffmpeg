@@ -19,6 +19,10 @@
 #include <mach/mach_time.h>
 #endif
 
+#ifdef __psp2__
+#include <psp2/rtc.h>
+#endif
+
 // Reference:
 // https://github.com/jasonchuang/CameraStreamer/blob/master/jni/video_api.c
 
@@ -98,6 +102,13 @@ static void _setup_clock() {
 	_clock_scale = ((double)info.numer / (double)info.denom) / 1000.0;
 	_clock_start = mach_absolute_time() * _clock_scale;
 }
+#elif defined(__psp2__)
+static uint64_t _tick_freq = 0;
+static void _setup_clock() {
+	_tick_freq = 1000000L / sceRtcGetTickResolution();
+	if (!sceRtcGetCurrentTick((SceRtcTick*)&_clock_start))
+		_clock_start *= _tick_freq;
+}
 #else
 #if defined(CLOCK_MONOTONIC_RAW) && !defined(JAVASCRIPT_ENABLED) // This is a better clock on Linux.
 #define GODOT_CLOCK CLOCK_MONOTONIC_RAW
@@ -114,6 +125,10 @@ static void _setup_clock() {
 static uint64_t get_ticks_usec() {
 	#if defined(__APPLE__)
 	uint64_t longtime = mach_absolute_time() * _clock_scale;
+	#elif defined(__psp2__)
+	uint64_t longtime = 0;
+	if (!sceRtcGetCurrentTick(&longtime))
+		longtime *= _tick_freq;
 	#else
 	struct timespec tv_now = { 0, 0 };
 	clock_gettime(GODOT_CLOCK, &tv_now);
